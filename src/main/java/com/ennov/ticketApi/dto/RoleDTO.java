@@ -12,13 +12,8 @@ import java.time.Instant;
 @NoArgsConstructor
 @Getter
 @Setter
-
 @ToString
-@Entity
 public class RoleDTO{
     private Long id;
-    private String libelle;
-    private Boolean isAdmin = false;
-    private Instant createdDate;
-    private Instant lastModifiedDate;
+    private String name;
 }

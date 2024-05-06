@@ -9,7 +9,6 @@ import lombok.*;
 @Setter
 @ToString
 public class AssignTicketRequestDTO {
-    private Long ticketId;
+    private Long id;
     private Long UserId;
-
 }

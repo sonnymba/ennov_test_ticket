@@ -10,7 +10,6 @@ import lombok.*;
 @ToString
 public class TicketResponseDTO {
     private Long id;
-    private String titre;
+    private String title;
     private String description;
-    private String statut;
 }

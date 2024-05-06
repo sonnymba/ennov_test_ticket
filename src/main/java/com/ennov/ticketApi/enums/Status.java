@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public enum Statut {
+public enum Status {
 
   EN_COURS("En cours"),
   TERMINE("Terminé"),
@@ -14,7 +14,7 @@ public enum Statut {
 
   private final String value;
 
-  Statut(String value) {
+  Status(String value) {
     this.value = value;
   }
 
@@ -22,12 +22,12 @@ public enum Statut {
     return value;
   }
 
-  public static Optional<Statut> toEnum(String label) {
+  public static Optional<Status> toEnum(String label) {
     if (label == null) {
       return Optional.empty();
     }
 
-    for (Statut mine : Statut.values()) {
+    for (Status mine : Status.values()) {
       if (label.equals(mine.getValue())) {
         return Optional.of(mine);
       }
@@ -36,9 +36,9 @@ public enum Statut {
     throw new IllegalArgumentException("no supported");
   }
 
-  public static List<Statut> orderedValues = new ArrayList<>();
+  public static List<Status> orderedValues = new ArrayList<>();
 
   static {
-    orderedValues.addAll(Arrays.asList(Statut.values()));
+    orderedValues.addAll(Arrays.asList(Status.values()));
   }
 }

@@ -13,7 +13,7 @@ import java.time.Instant;
 @ToString
 public class DetailsTicketResponseDTO {
     private Long id;
-    private String titre;
+    private String title;
     private String description;
     private String statut;
     private UserResponseDTO createdUser;

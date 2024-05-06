@@ -1,6 +1,6 @@
 package com.ennov.ticketApi.entities;
 
-import com.ennov.ticketApi.enums.Statut;
+import com.ennov.ticketApi.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,13 +15,12 @@ import lombok.*;
 public class Ticket extends BaseAuditingEntity {
 
     @Column(nullable = false, unique = true)
-    private String titre;
+    private String title;
 
     @Column(nullable = false)
     private String description;
 
     @ManyToOne()
-    @Column(nullable = false)
     private User createdUser;
 
     @ManyToOne
@@ -29,6 +28,6 @@ public class Ticket extends BaseAuditingEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Statut statut;
+    private Status status;
 
 }

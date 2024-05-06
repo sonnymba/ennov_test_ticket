@@ -9,9 +9,8 @@ import lombok.*;
 @Setter
 @ToString
 public class TicketRequestDTO {
-    private Long id;
-    private String titre;
+    private String title;
     private String description;
-    private String statut;
+    private String status;
 
 }

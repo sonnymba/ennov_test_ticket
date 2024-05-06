@@ -1,6 +1,5 @@
 package com.ennov.ticketApi.entities;
 
-import com.ennov.ticketApi.enums.Statut;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,4 +30,10 @@ public class Role {
             inverseJoinColumns = @JoinColumn(
                     name = "privilege_id", referencedColumnName = "id"))
     private Collection<Privilege> privileges;
+
+    public Role(String name) {
+        this.name = name;
+    }
+
+
 }
