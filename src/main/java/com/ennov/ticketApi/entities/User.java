@@ -46,7 +46,6 @@ public class User implements UserDetails {
 
     private boolean enabled;
 
-    private boolean tokenExpired;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @Fetch(value = FetchMode.SUBSELECT)

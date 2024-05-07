@@ -7,15 +7,12 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import java.util.List;
 
-public interface GenericMapper<Entity, RequestDTO, ResponseDTO, DetailsDTO> {
+public interface GenericMapper<Entity, RequestDTO, ResponseDTO, SmallDTO> {
     Entity asEntity(RequestDTO dto);
-
-    List<Entity> asEntityList(List<RequestDTO> dtoList);
-
 
     //Get one entity
     ResponseDTO asDTO(Entity entity);
-    DetailsDTO asDetailsDTO(Entity entity);
+    SmallDTO asSmallDTO(Entity entity);
 
 
     @Named("partialUpdate")
