@@ -13,6 +13,5 @@ import java.util.List;
 public class UserRequestDTO {
     private String username;
     private String email;
-    private List<Long> roleIds;
-
+    private String password;
 }

@@ -1,9 +1,10 @@
 package com.ennov.ticketApi.controller;
 
 import com.ennov.ticketApi.dto.request.TicketRequestDTO;
-import com.ennov.ticketApi.dto.response.DetailsTicketResponseDTO;
-import com.ennov.ticketApi.dto.response.EntityResponse;
+
+import com.ennov.ticketApi.dto.response.SmallTicketDTO;
 import com.ennov.ticketApi.dto.response.TicketResponseDTO;
+import com.ennov.ticketApi.entities.Ticket;
 import com.ennov.ticketApi.enums.Status;
 import com.ennov.ticketApi.exceptions.APIException;
 import com.ennov.ticketApi.exceptions.ResourceNotFoundException;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 @RestController
 @CrossOrigin("*")
 @Slf4j
-public class TicketController implements CrudController<TicketRequestDTO, TicketResponseDTO, DetailsTicketResponseDTO> {
+public class TicketController implements CrudController<TicketRequestDTO, Ticket> {
 
     @Autowired
     private TicketService service;
@@ -31,48 +32,51 @@ public class TicketController implements CrudController<TicketRequestDTO, Ticket
      */
 
     @Override
-    public ResponseEntity<EntityResponse> save(TicketRequestDTO dto) {
+    public ResponseEntity<?> save(TicketRequestDTO dto) {
         if (dto.getTitle() == null) throw new APIException("Title is required");
         if (dto.getDescription() == null) throw new APIException("Description is required");
         if (dto.getStatus() == null) throw new APIException("Status is required");
         if (Status.valueOf(dto.getStatus()).getValue().isEmpty()) throw new ResourceNotFoundException("Status not found");
-        return service.save(dto);
+        return ResponseEntity.ok().body(service.save(dto));
     }
 
-    @Override
-    public DetailsTicketResponseDTO getOne(Long id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getOne(@PathVariable(name = "id") Long id) {
         if (id == null) throw new APIException("Id is required");
-        return service.getOne(id);
+        return ResponseEntity.ok().body(service.getOne(id));
     }
 
     @Override
-    public List<TicketResponseDTO> list() {
+    public List<Ticket> list() {
         return service.getAll();
     }
 
+
     @Override
-    public ResponseEntity<EntityResponse> update(TicketRequestDTO dto, Long id) {
+    public ResponseEntity<?> update(Long id, TicketRequestDTO dto) {
         if (dto.getTitle() == null) throw new APIException("Title is required");
         if (dto.getDescription() == null) throw new APIException("Description is required");
         if (dto.getStatus() == null) throw new APIException("Status is required");
         if (Status.valueOf(dto.getStatus()).getValue().isEmpty()) throw new ResourceNotFoundException("Status not found");
-        return service.update(dto, id);
+        return ResponseEntity.ok().body(service.update(id, dto));
     }
 
 
 
-    @Override
-    public ResponseEntity<EntityResponse> delete(Long id) {
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable(name = "id") Long id) {
         if (id == null) throw new APIException("Id is required");
-        return service.delete(id);
+       service.delete(id);
     }
 
     @PutMapping("/{id}/assign/{userId}")
 
-    public TicketResponseDTO assign(@PathVariable(name = "id") Long id, @PathVariable(name = "userId") Long userId) {
+    public ResponseEntity<?> assign(@PathVariable(name = "id") Long id, @PathVariable(name = "userId") Long userId) {
         if (id == null) throw new APIException("id is required");
         if (userId == null) throw new APIException("userId is required");
-        return service.assignTicketToUser(id, userId);
+        Ticket ticket =  service.assignTicketToUser(id, userId);
+
+        return ResponseEntity.ok().body(ticket);
     }
 
 }

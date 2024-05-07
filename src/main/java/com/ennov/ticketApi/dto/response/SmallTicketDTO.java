@@ -8,10 +8,9 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-public class TicketResponseDTO {
+public class SmallTicketDTO {
     private Long id;
     private String title;
     private String description;
-    private SmallUserDTO createdUser;
-    private SmallUserDTO assignUser;
+    private UserResponseDTO createdUser;
 }

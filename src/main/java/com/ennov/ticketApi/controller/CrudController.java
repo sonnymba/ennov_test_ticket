@@ -1,6 +1,5 @@
 package com.ennov.ticketApi.controller;
 
-import com.ennov.ticketApi.dto.response.EntityResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,22 +7,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-public interface CrudController<RequestDTO, ResponseDTO, DetailsDTO> {
+public interface CrudController<RequestDTO, Entity> {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    ResponseEntity<EntityResponse> save(@Valid @RequestBody RequestDTO dto);
-
-    @GetMapping("/{id}")
-    DetailsDTO getOne(@PathVariable("id") Long id);
+    ResponseEntity<?> save(@Valid @RequestBody RequestDTO dto);
 
     @GetMapping
-    List<ResponseDTO> list();
+    List<Entity> list();
 
     @PutMapping("/{id}")
-    ResponseEntity<EntityResponse> update(@Valid @RequestBody RequestDTO dto, @PathVariable("id") Long id);
+    ResponseEntity<?> update(@PathVariable("id") Long id, @Valid @RequestBody RequestDTO dto);
 
-
-    @DeleteMapping("/{id}")
-    ResponseEntity<EntityResponse> delete(@PathVariable(name = "id") Long id);
 
 }
