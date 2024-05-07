@@ -1,107 +1,144 @@
 package com.ennov.ticketApi.service;
 
-import com.ennov.ticketApi.dao.PrivilegeRepository;
-import com.ennov.ticketApi.dao.RoleRepository;
 import com.ennov.ticketApi.dao.TicketRepository;
 import com.ennov.ticketApi.dao.UserRepository;
+import com.ennov.ticketApi.dto.request.TicketRequestDTO;
 import com.ennov.ticketApi.entities.Ticket;
 import com.ennov.ticketApi.entities.User;
 import com.ennov.ticketApi.enums.Status;
-import com.ennov.ticketApi.mapper.TicketMapper;
-import com.ennov.ticketApi.mapper.UserMapper;
+import com.ennov.ticketApi.exceptions.ResourceNotFoundException;
 import com.ennov.ticketApi.service.impl.TicketServiceimpl;
-import com.ennov.ticketApi.service.impl.UserServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.BDDMockito.given;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+class TicketServiceTest {
 
+    public static final long ID = 1L;
+    public static final long ID_USER = ID;
+    @Mock
+    private TicketRepository ticketRepository;
 
-@ExtendWith(MockitoExtension.class)
-public class TicketServiceTest {
-
-
-    public static final Long TICKET_ID = 79L;
-    public static final String TICKET_TITLE = "Ticket-01";
-    public static final String TICKET_DESCRIPTION = "Une petite description";
-
-    public static Status TICKET_STATUS = Status.EN_COURS;
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
-    TicketServiceimpl ticketService;
+    private TicketServiceimpl ticketService;
 
-    @Mock
-    UserRepository userRepository;
+    private Ticket ticket;
+    private TicketRequestDTO ticketDto;
+    private User user;
+    private List<Ticket> ticketList;
 
-    @Mock
-    TicketMapper mapper;
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.initMocks(this);
+        ticket = new Ticket();
+        ticket.setTitle("Test Ticket");
+        ticket.setDescription("Test Description");
+        ticket.setAssignedTo(user);
+        ticket.setStatus(Status.EN_COURS);
+        user = new User();
 
+        ticketList.add(ticket);
 
-    @Mock
-    TicketRepository repository;
-
-
-
-    //Récupérer tous les tickets
-    @Test
-    void whenGetAll_thenListOfTicketResponseDTO(){
-        List<Ticket> tickets = new ArrayList<>();
-        tickets.add(new Ticket());
-        List<Ticket> mapList = ticketService.getAll();
-
-        given(mapList).willReturn(tickets);
-        List<Ticket> excepted = ticketService.getAll();
-        assertEquals(excepted, tickets);
-        verify(repository).findAll();
+        ticketDto = new TicketRequestDTO();
+        ticketDto.setTitle("Test Ticket");
+        ticketDto.setDescription("Test Description");
+        ticketDto.setStatus(Status.EN_COURS.getValue());
     }
 
-
-    //Récupérer un ticket par son ID.
     @Test
-    void givenId_whenGetOne_thenTicketResponseDTO(){
-
+    void testSaveTicket() {
+        when(ticketRepository.save(ticket)).thenReturn(ticket);
+        Ticket savedTicket = ticketService.save(ticketDto);
+        assertEquals(ticket, savedTicket);
+        verify(ticketRepository, times(1)).save(ticket);
     }
 
-    //Créer un nouveau ticket
     @Test
-    void givenTicketRequestDTO_whenSave_thenSmallTicketDTO(){
-
+    void testGetAllTickets() {
+        when(ticketRepository.findAll()).thenReturn(ticketList);
+        List<Ticket> tickets = ticketService.getAll();
+        assertEquals(ticketList, tickets);
+        verify(ticketRepository, times(1)).findAll();
     }
 
-    //Mettre à jour un ticket existant.
     @Test
-    void givenIdAndTicketRequestDTO_whenUpdate_thenTicketResponseDTO(){
-
+    void testGetOne() {
+        when(ticketRepository.findById(ID)).thenReturn(Optional.of(ticket));
+        Ticket foundTicket = ticketService.getOne(ID);
+        assertEquals(ticket, foundTicket);
+        verify(ticketRepository, times(1)).findById(ID);
     }
 
-    //Assigner un ticket à un utilisateur.
     @Test
-    void givenIdAndUserId_whenAssignTicketToUser_thenTicketResponseDTO(){
-
+    void testGetOneNotFound() {
+        when(ticketRepository.findById(ID)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> ticketService.getOne(ID));
+        verify(ticketRepository, times(1)).findById(ID);
     }
 
-    //Supprimer un ticket par son ID.
     @Test
-    void whenGivenId_shouldDeleteTicket_ifFound(){
-       Ticket ticket = new Ticket();
-       ticket.setId(TICKET_ID);
-       ticket.setTitle(TICKET_TITLE);
-       ticket.setDescription(TICKET_DESCRIPTION);
-       ticket.setStatus(TICKET_STATUS);
+    void testUpdateTicket() {
+        when(ticketRepository.findById(ID)).thenReturn(Optional.of(ticket));
+        when(ticketRepository.save(ticket)).thenReturn(ticket);
+        TicketRequestDTO updatedTicket = new TicketRequestDTO();
+        updatedTicket.setTitle("Updated Ticket");
+        updatedTicket.setDescription("Updated Description");
+        updatedTicket.setStatus(Status.EN_COURS.getValue());
+        Ticket savedTicket = ticketService.update(ID, updatedTicket);
+        Ticket ticketEntity = ticketService.getOne(ID);
+        assertEquals(updatedTicket, savedTicket);
+        verify(ticketRepository, times(1)).findById(ID);
+        verify(ticketRepository, times(1)).save(ticketEntity);
+    }
 
-       given(repository.findById(anyLong())).willReturn(Optional.of(ticket));
-       ticketService.delete(ticket.getId());
+    @Test
+    void testUpdateTicketNotFound() {
+        when(ticketRepository.findById(ID)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> ticketService.update(ID, ticketDto));
+        verify(ticketRepository, times(1)).findById(ID);
+    }
+
+    @Test
+    void testDeleteTicket() {
+        when(ticketRepository.findById(ID)).thenReturn(Optional.of(ticket));
+        ticketService.delete(ID);
+        verify(ticketRepository, times(1)).delete(ticket);
+    }
+
+    @Test
+    void testDeleteTicketNotFound() {
+        when(ticketRepository.findById(ID)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> ticketService.delete(ID));
+        verify(ticketRepository, times(1)).findById(ID);
+    }
+
+    @Test
+    void testAssignTicketToUser() {
+        when(ticketRepository.findById(ID)).thenReturn(Optional.of(ticket));
+        when(userRepository.findById(ID_USER)).thenReturn(Optional.of(user));
+        assertThrows(ResourceNotFoundException.class, () -> ticketService.assignTicketToUser(ID, ID_USER));
+        //assertEquals(ticket.getAssignedTo(), user);
+        verify(ticketRepository, times(1)).findById(ID);
+    }
+
+    @Test
+    void testGetlistAssignedTickerusers() {
+        when(userRepository.findById(ID_USER)).thenReturn(Optional.of(user));
+        User assignUser = userRepository.getReferenceById(ID);
+        when(ticketRepository.findByAssignedUser(assignUser)).thenReturn(ticketList);
+        List<Ticket> tickets = ticketService.listAssignedToUser(ID_USER);
+        assertEquals(ticketList, tickets);
+        verify(ticketRepository, times(1)).findByAssignedUser(assignUser);
     }
 }

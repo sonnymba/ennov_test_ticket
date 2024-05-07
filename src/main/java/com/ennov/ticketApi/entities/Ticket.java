@@ -24,11 +24,8 @@ public class Ticket{
     @Column(nullable = false)
     private String description;
 
-    @ManyToOne()
-    private User createdUser;
-
     @ManyToOne
-    private User assignedUser;
+    private User assignedTo;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

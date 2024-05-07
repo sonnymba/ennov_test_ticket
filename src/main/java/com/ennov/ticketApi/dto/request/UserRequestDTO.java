@@ -11,6 +11,7 @@ import java.util.List;
 @Setter
 @ToString
 public class UserRequestDTO {
+    private Long id;
     private String username;
     private String email;
     private String password;
