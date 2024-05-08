@@ -1,9 +1,8 @@
 package com.ennov.ticketApi.entities;
 
 import com.ennov.ticketApi.dto.request.TicketRequestDTO;
-import com.ennov.ticketApi.dto.response.TicketResponseDTO;
 import com.ennov.ticketApi.enums.Status;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.*;
 
 

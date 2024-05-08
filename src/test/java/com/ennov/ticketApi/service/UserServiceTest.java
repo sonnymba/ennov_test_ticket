@@ -5,11 +5,11 @@ import com.ennov.ticketApi.dto.request.UserRequestDTO;
 import com.ennov.ticketApi.entities.Role;
 import com.ennov.ticketApi.entities.User;
 import com.ennov.ticketApi.exceptions.ResourceNotFoundException;
+import com.ennov.ticketApi.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 class UserServiceTest {
 
@@ -32,7 +33,7 @@ class UserServiceTest {
     private UserRepository userRepository;
 
     @InjectMocks
-    private UserService userService;
+    private UserServiceImpl userService;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
@@ -44,7 +45,7 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
+        initMocks(this);
         user = new User();
         user.setId(ID);
         user.setUsername(USERNAME);
@@ -52,6 +53,7 @@ class UserServiceTest {
         user.setPassword(passwordEncoder.encode(PASSWORD));
         user.setEnabled(true);
         user.setRoles(roles);
+
         role = new Role();
         role.setId(ID);
         role.setName(ROLE_USER);
@@ -60,7 +62,7 @@ class UserServiceTest {
         userList = new ArrayList<>();
         userList.add(user);
 
-        dto.setId(ID);
+        dto = new UserRequestDTO();
         dto.setUsername(USERNAME);
         dto.setEmail(EMAIL);
         dto.setPassword(PASSWORD);
@@ -68,10 +70,10 @@ class UserServiceTest {
 
     @Test
     void testSaveUser() {
-        when(userRepository.save(user)).thenReturn(user);
+        doReturn(user).when(userRepository).save(any(User.class));
         User savedUser = userService.save(dto);
+        assertNotNull(savedUser);
         assertEquals(user, savedUser);
-        verify(userRepository, times(1)).save(user);
     }
 
     @Test

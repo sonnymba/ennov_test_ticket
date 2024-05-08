@@ -1,10 +1,9 @@
 package com.ennov.ticketApi.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.*;
 import lombok.experimental.Accessors;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,9 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor
@@ -67,9 +64,6 @@ public class User implements UserDetails {
                 .collect(Collectors.toList());
     }
 
-    public void setAuthorities(Role authority) {
-        this.roles.add(authority);
-    }
 
     @Override
     public String getUsername() {

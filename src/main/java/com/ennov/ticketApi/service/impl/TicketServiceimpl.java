@@ -10,12 +10,11 @@ import com.ennov.ticketApi.exceptions.APIException;
 import com.ennov.ticketApi.exceptions.ResourceNotFoundException;
 import com.ennov.ticketApi.service.MainService;
 import com.ennov.ticketApi.service.TicketService;
-import jakarta.transaction.Transactional;
+import javax.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,15 +26,19 @@ public class TicketServiceimpl implements TicketService {
     TicketRepository ticketRepository;
 
     @Autowired
+    UserRepository userRepository;
+
+    @Autowired
     MainService mainService;
 
     @Override
     public Ticket save(TicketRequestDTO dto) {
         try{
-            if(exitbyTitle(dto.getTitle())) throw new APIException("Ticket already exists");
+            if(exitbyTitle(dto.getTitle())) throw new APIException("Ticket with title already exists");
             Ticket ticket = new Ticket(dto);
             ticket.setAssignedTo(mainService.getCurrentUser());
-            return ticketRepository.save(ticket);
+            return  ticketRepository.save(ticket);
+
         }catch (Exception e){
             throw new APIException(e.getMessage());
         }
@@ -73,8 +76,8 @@ public class TicketServiceimpl implements TicketService {
     @Override
     public Ticket assignTicketToUser(Long id, Long userId) {
         Ticket ticket = getOne(id);
-        User user = mainService.userRepository.findById(userId).orElseThrow(
-                () -> new ResourceNotFoundException("User not found with id"+userId)
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new ResourceNotFoundException("User not found with id "+userId)
         );
         ticket.setAssignedTo(user);
         return ticketRepository.save(ticket);
@@ -82,12 +85,10 @@ public class TicketServiceimpl implements TicketService {
 
     @Override
     public List<Ticket> listAssignedToUser(Long userId){
-        List<Ticket> results = new ArrayList<>();
-        User user = mainService.userRepository.findById(userId).orElseThrow(
-                () -> new ResourceNotFoundException("User not found with id"+userId)
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new ResourceNotFoundException("User not found with id "+userId)
         );
-        results =  ticketRepository.findByAssignedTo(user);
-        return results;
+        return ticketRepository.findByAssignedTo(user);
     }
 
     @Override

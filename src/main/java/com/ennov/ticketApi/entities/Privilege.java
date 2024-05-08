@@ -1,6 +1,6 @@
 package com.ennov.ticketApi.entities;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.*;
 
 import java.util.Collection;

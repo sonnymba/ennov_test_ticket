@@ -2,18 +2,12 @@ package com.ennov.ticketApi.controller;
 
 import com.ennov.ticketApi.dto.request.TicketRequestDTO;
 
-import com.ennov.ticketApi.dto.request.UserRequestDTO;
-import com.ennov.ticketApi.dto.response.LiteTicketDTO;
-import com.ennov.ticketApi.dto.response.LiteUserDTO;
 import com.ennov.ticketApi.dto.response.TicketResponseDTO;
 import com.ennov.ticketApi.entities.Ticket;
-import com.ennov.ticketApi.entities.User;
-import com.ennov.ticketApi.enums.Status;
+
 import com.ennov.ticketApi.exceptions.APIException;
-import com.ennov.ticketApi.exceptions.ResourceNotFoundException;
 import com.ennov.ticketApi.service.TicketService;
-import com.ennov.ticketApi.utils.MyUtils;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,9 +24,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TicketController{
 
+    private static final String TICKET_ENDPOINT = "/tickets/";
+
     @Autowired
     private TicketService service;
 
+    /**
+     * Récupérer tous les tickets.
+     */
     @GetMapping
     public ResponseEntity<List<TicketResponseDTO>> list() {
         List<Ticket> tickets = service.getAll();
@@ -41,6 +39,9 @@ public class TicketController{
         return ResponseEntity.ok(dtos);
     }
 
+    /**
+     * Récupérer un ticket par son ID.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<TicketResponseDTO> getOne(@PathVariable(name = "id") Long id) {
         if(id == null) throw new APIException("id is required");
@@ -49,16 +50,22 @@ public class TicketController{
         return ResponseEntity.ok(ticketDTO);
     }
 
+    /**
+     * Créer un nouveau ticket.
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<TicketResponseDTO> save(@RequestBody @Valid TicketRequestDTO dto) {
-        if(!MyUtils.isValidEmailAddress(dto.getTitle())) throw new APIException("title is already exist.");
+        if(service.exitbyTitle(dto.getTitle())) throw new APIException("title is already exist.");
         Ticket ticket = service.save(dto);
         TicketResponseDTO ticketDTO = new TicketResponseDTO(ticket);
-        URI uri = URI.create("/tickets/" + ticketDTO.getId());
+        URI uri = URI.create(TICKET_ENDPOINT + ticketDTO.getId());
         return ResponseEntity.created(uri).body(ticketDTO);
     }
 
+    /**
+     * Mettre à jour un ticket existant.
+     */
     @PutMapping("/{id}")
     public ResponseEntity<TicketResponseDTO> update(@PathVariable(name = "id")  Long id, @RequestBody @Valid TicketRequestDTO dto) {
         if(id == null) throw new APIException("id is required");
@@ -69,8 +76,11 @@ public class TicketController{
     }
 
 
+    /**
+     * Assigner un ticket à un utilisateur.
+     */
     @PutMapping("/{id}/assign/{userId}")
-    public ResponseEntity<TicketResponseDTO> update(@PathVariable(name = "id")  Long id, @PathVariable(name = "userId") Long userId) {
+    public ResponseEntity<TicketResponseDTO> assignTicketToUser(@PathVariable(name = "id")  Long id, @PathVariable(name = "userId") Long userId) {
         if(id == null) throw new APIException("id is required");
         if(userId == null) throw new APIException("userId is required");
 
@@ -79,6 +89,9 @@ public class TicketController{
         return ResponseEntity.ok(dto);
     }
 
+    /**
+     * Supprimer un ticket par son ID
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         if(id == null) throw new APIException("id is required");

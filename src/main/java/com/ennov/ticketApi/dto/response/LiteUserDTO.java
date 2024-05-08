@@ -14,8 +14,10 @@ public class LiteUserDTO {
     private String email;
 
     public LiteUserDTO(User user) {
-        this.id = user.getId();
-        this.username = user.getUsername();
-        this.email = user.getEmail();
+        if(user != null) {
+            this.id = user.getId();
+            this.username = user.getUsername();
+            this.email = user.getEmail();
+        }
     }
 }

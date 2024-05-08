@@ -16,10 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class MainService {
 
-
-
     @Autowired
     public UserRepository userRepository;
+
     public User getCurrentUser() throws ResourceNotFoundException{
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {

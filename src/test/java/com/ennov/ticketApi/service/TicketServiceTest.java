@@ -17,7 +17,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -34,7 +33,7 @@ class TicketServiceTest {
 
     @InjectMocks
     private TicketServiceimpl ticketService;
-    @InjectMocks
+    @Mock
     private MainService mainService;
 
     private Ticket ticket;
@@ -58,20 +57,13 @@ class TicketServiceTest {
         ticketDto.setStatus(Status.EN_COURS.toString());
     }
 
-//    @Test
-//    void testSave() throws Exception {
-//        TicketRequestDTO dto = new TicketRequestDTO();
-//        dto.setTitle("Test Ticket");
-//        dto.setDescription("Test Description");
-//        dto.setStatus(Status.EN_COURS.toString());
-//
-//        Ticket savedTicket = new Ticket();
-//        savedTicket.setId(UUID.randomUUID().getMostSignificantBits());
-//        savedTicket.setAssignedTo(ticketService.getCurrentUser());
-//        Ticket response = ticketService.save(dto);
-//        assertEquals(savedTicket.getId(), response.getId());
-//        verify(ticketRepository, times(1)).save(any(Ticket.class));
-//    }
+    @Test
+    void testSave() throws Exception {
+        doReturn(ticket).when(ticketRepository).save(any(Ticket.class));
+        Ticket savedTicket = ticketService.save(ticketDto);
+        assertNotNull(savedTicket);
+        assertEquals(ticket, savedTicket);
+    }
 
     @Test
     void testGetAllTickets() {
@@ -135,13 +127,13 @@ class TicketServiceTest {
     void testAssignTicketToUser() {
         when(ticketRepository.findById(ID)).thenReturn(Optional.of(ticket));
         when(userRepository.findById(ID_USER)).thenReturn(Optional.of(user));
-        User userToAssign = userRepository.getReferenceById(ID);
+        User userToAssign = userRepository.getById(ID);
         ticket.setAssignedTo(userToAssign);
         Ticket ticketR = ticketRepository.save(ticket);
         Ticket assignTicket = ticketService.assignTicketToUser(ID, ID_USER);
         assertEquals(assignTicket, ticketR);
         verify(ticketRepository, times(1)).findById(ID);
-        verify(userRepository, times(1)).getReferenceById(ID_USER);
+        verify(userRepository, times(1)).getById(ID_USER);
     }
 
     @Test

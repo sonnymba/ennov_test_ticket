@@ -5,16 +5,14 @@ import com.ennov.ticketApi.config.security.services.UserDetailsImpl;
 import com.ennov.ticketApi.dto.request.AuthRequestDTO;
 import com.ennov.ticketApi.dto.response.JwtResponse;
 import com.ennov.ticketApi.exceptions.AuthenticationException;
-import com.ennov.ticketApi.service.MainService;
-import com.ennov.ticketApi.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,21 +26,17 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AccountController {
 
-    @Autowired
-    private UserService userService;
+
     @Autowired
     AuthenticationManager authManager;
     @Autowired
     JwtUtils jwtUtils;
 
 
-    @Autowired
-    private MainService mainService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid AuthRequestDTO request) {
 
-        log.info(request.getUsername() + " " + request.getPassword());
         try {
            Authentication authentication = authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
@@ -51,7 +45,7 @@ public class AccountController {
             String jwt = jwtUtils.generateJwtToken(authentication);
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
             List<String> roles = userDetails.getAuthorities().stream()
-                    .map(item -> item.getAuthority())
+                    .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok().body(new JwtResponse(
@@ -64,6 +58,7 @@ public class AccountController {
             throw new AuthenticationException(ex.getMessage());
         }
     }
+
 
 
 

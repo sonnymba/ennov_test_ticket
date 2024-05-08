@@ -18,10 +18,12 @@ public class TicketResponseDTO {
     private LiteUserDTO assignedTo;
 
     public TicketResponseDTO(Ticket ticket) {
-        this.id = ticket.getId();
-        this.title = ticket.getTitle();
-        this.description = ticket.getDescription();
-        this.status = ticket.getStatus();
-        this.assignedTo = new LiteUserDTO(ticket.getAssignedTo());
+       if( ticket != null ){
+           this.id = ticket.getId();
+           this.title = ticket.getTitle();
+           this.description = ticket.getDescription();
+           this.status = ticket.getStatus();
+           this.assignedTo = new LiteUserDTO(ticket.getAssignedTo());
+       }
     }
 }
