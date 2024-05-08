@@ -1,6 +1,6 @@
 package com.ennov.ticketApi.entities;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.*;
 
 import java.util.Collection;
@@ -19,7 +19,6 @@ public class Role {
     private Long id;
 
     private String name;
-
     @ManyToMany(mappedBy = "roles")
     private Collection<User> users;
 
@@ -34,11 +33,6 @@ public class Role {
 
     public Role(String name) {
         this.name = name;
-    }
-
-    public Role(String name, Collection<Privilege> privileges){
-        this.name = name;
-        this.privileges = privileges;
     }
 
 

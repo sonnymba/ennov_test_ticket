@@ -1,5 +1,7 @@
 package com.ennov.ticketApi.dto.response;
 
+import com.ennov.ticketApi.entities.Ticket;
+import com.ennov.ticketApi.enums.Status;
 import lombok.*;
 
 
@@ -12,6 +14,16 @@ public class TicketResponseDTO {
     private Long id;
     private String title;
     private String description;
-    private SmallUserDTO createdUser;
-    private SmallUserDTO assignUser;
+    private Status status;
+    private LiteUserDTO assignedTo;
+
+    public TicketResponseDTO(Ticket ticket) {
+       if( ticket != null ){
+           this.id = ticket.getId();
+           this.title = ticket.getTitle();
+           this.description = ticket.getDescription();
+           this.status = ticket.getStatus();
+           this.assignedTo = new LiteUserDTO(ticket.getAssignedTo());
+       }
+    }
 }

@@ -18,4 +18,7 @@ public class JwtResponse {
     private Long id;
     private String username;
     private List<String> roles;
+
+    public JwtResponse(String jwt, Long id, String username, List<String> roles, LiteUserDTO userByUsername) {
+    }
 }

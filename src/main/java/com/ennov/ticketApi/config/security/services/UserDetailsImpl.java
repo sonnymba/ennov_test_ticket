@@ -3,6 +3,7 @@ package com.ennov.ticketApi.config.security.services;
 import com.ennov.ticketApi.entities.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,8 +17,9 @@ import java.util.stream.Collectors;
 public class UserDetailsImpl implements UserDetails {
     private static final long serialVersionUID = 1L;
     public boolean isEnabled;
+    @Getter
     private final Long id;
-    private String username;
+    private final String username;
     private final String email;
     @JsonIgnore
     private final String password;
@@ -26,7 +28,7 @@ public class UserDetailsImpl implements UserDetails {
     public UserDetailsImpl(Long id, String username, String email, String password, boolean isEnabled,
                            Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
-        this.username = email;
+        this.username = username;
         this.email = email;
         this.password = password;
         this.isEnabled = isEnabled;
@@ -52,12 +54,6 @@ public class UserDetailsImpl implements UserDetails {
         return authorities;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-
-
 
     @Override
     public String getPassword() {
@@ -66,7 +62,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return username;
     }
 
     @Override

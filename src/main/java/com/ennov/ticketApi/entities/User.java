@@ -1,10 +1,9 @@
 package com.ennov.ticketApi.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.*;
 import lombok.experimental.Accessors;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,8 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor
@@ -22,8 +20,6 @@ import java.util.stream.Collectors;
 @Setter
 @Accessors(chain = true)
 @Table(name = "users")
-@EqualsAndHashCode(callSuper = false)
-@ToString
 @Inheritance(strategy = InheritanceType.JOINED)
 @Entity
 public class User implements UserDetails {
@@ -39,12 +35,15 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @OneToMany(mappedBy = "assignedTo")
+    private List<Ticket> tickets;
 
     @Column(nullable = false)
     private String password;
 
 
     private boolean enabled;
+
 
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -55,7 +54,7 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Collection<Role> roles;
 
-
+    private boolean tokenExpired;
 
     //userDetails
     @Override
@@ -65,9 +64,6 @@ public class User implements UserDetails {
                 .collect(Collectors.toList());
     }
 
-    public void setAuthorities(Role authority) {
-        this.roles.add(authority);
-    }
 
     @Override
     public String getUsername() {
