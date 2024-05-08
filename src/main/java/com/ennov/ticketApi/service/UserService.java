@@ -9,4 +9,6 @@ public interface UserService extends GenericService<User, UserRequestDTO> {
 
     boolean existWithUsersame(String username);
     boolean existWithEmail(String email);
+
+    User findByUsername(String username);
 }

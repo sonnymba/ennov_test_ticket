@@ -6,17 +6,16 @@ import com.ennov.ticketApi.dto.request.TicketRequestDTO;
 import com.ennov.ticketApi.entities.Ticket;
 import com.ennov.ticketApi.entities.User;
 import com.ennov.ticketApi.enums.Status;
+import com.ennov.ticketApi.exceptions.APIException;
 import com.ennov.ticketApi.exceptions.ResourceNotFoundException;
+import com.ennov.ticketApi.service.MainService;
 import com.ennov.ticketApi.service.TicketService;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,29 +24,32 @@ import java.util.List;
 public class TicketServiceimpl implements TicketService {
 
     @Autowired
-    TicketRepository repository;
+    TicketRepository ticketRepository;
 
     @Autowired
-    UserRepository userRepository;
+    MainService mainService;
 
     @Override
     public Ticket save(TicketRequestDTO dto) {
-        Ticket ticket = new Ticket();
-        ticket.setTitle(dto.getTitle());
-        ticket.setDescription(dto.getDescription());
-        ticket.setStatus(Status.valueOf(dto.getStatus()));
-        ticket.setAssignedTo(getCurrentUser());
-        return repository.save(ticket);
+        try{
+            if(exitbyTitle(dto.getTitle())) throw new APIException("Ticket already exists");
+            Ticket ticket = new Ticket(dto);
+            ticket.setAssignedTo(mainService.getCurrentUser());
+            return ticketRepository.save(ticket);
+        }catch (Exception e){
+            throw new APIException(e.getMessage());
+        }
+
     }
 
     @Override
     public List<Ticket> getAll() {
-        return repository.findAll();
+        return ticketRepository.findAll();
     }
 
     @Override
     public Ticket getOne(Long id) {
-        return repository.findById(id).orElseThrow(
+        return ticketRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Ticket not found with id "+id)
         );
     }
@@ -58,47 +60,39 @@ public class TicketServiceimpl implements TicketService {
         ticket.setTitle(dto.getTitle());
         ticket.setDescription(dto.getDescription());
         ticket.setStatus(Status.valueOf(dto.getStatus()));
-        return repository.save(ticket);
+        return ticketRepository.save(ticket);
     }
 
     @Override
     public void delete(Long id) {
         Ticket ticket = getOne(id);
-        repository.delete(ticket);
+        ticketRepository.delete(ticket);
     }
 
 
     @Override
     public Ticket assignTicketToUser(Long id, Long userId) {
         Ticket ticket = getOne(id);
-        User user = userRepository.findById(userId).orElseThrow(
+        User user = mainService.userRepository.findById(userId).orElseThrow(
                 () -> new ResourceNotFoundException("User not found with id"+userId)
         );
         ticket.setAssignedTo(user);
-        return repository.save(ticket);
+        return ticketRepository.save(ticket);
     }
 
     @Override
     public List<Ticket> listAssignedToUser(Long userId){
-        User user = userRepository.findById(userId).orElseThrow(
+        List<Ticket> results = new ArrayList<>();
+        User user = mainService.userRepository.findById(userId).orElseThrow(
                 () -> new ResourceNotFoundException("User not found with id"+userId)
         );
-        return repository.findByAssignedUser(user);
+        results =  ticketRepository.findByAssignedTo(user);
+        return results;
     }
 
     @Override
     public boolean exitbyTitle(String title) {
-        return repository.getByTitle(title).isPresent();
+        return ticketRepository.getByTitle(title).isPresent();
     }
 
-    public User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
-            throw new ResourceNotFoundException("The current user not found!");
-        }
-        UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
-        return  userRepository.findByUsername(userPrincipal.getUsername()).orElseThrow(
-                () ->  new ResourceNotFoundException("User not found with username " + userPrincipal.getUsername())
-        );
-    }
 }

@@ -12,4 +12,5 @@ public interface TicketService extends GenericService<Ticket, TicketRequestDTO> 
     List<Ticket> listAssignedToUser(Long userId);
 
     boolean exitbyTitle(String title);
+
 }
