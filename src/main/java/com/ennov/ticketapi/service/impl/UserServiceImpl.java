@@ -1,10 +1,8 @@
 package com.ennov.ticketapi.service.impl;
 
-import com.ennov.ticketapi.dao.PrivilegeRepository;
 import com.ennov.ticketapi.dao.RoleRepository;
 import com.ennov.ticketapi.dao.UserRepository;
 import com.ennov.ticketapi.dto.request.UserRequestDTO;
-import com.ennov.ticketapi.entities.Privilege;
 import com.ennov.ticketapi.entities.Role;
 import com.ennov.ticketapi.entities.User;
 import com.ennov.ticketapi.exceptions.APIException;
@@ -26,14 +24,12 @@ public class UserServiceImpl implements UserService {
     public static final String ROLE_USER = "ROLE_USER";
     private final UserRepository repository;
     private  final RoleRepository roleRepository;
-    private  final PrivilegeRepository privilegeRepository;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
-    public UserServiceImpl(UserRepository repository, RoleRepository roleRepository, PrivilegeRepository privilegeRepository) {
+    public UserServiceImpl(UserRepository repository, RoleRepository roleRepository) {
         this.repository = repository;
         this.roleRepository = roleRepository;
-        this.privilegeRepository = privilegeRepository;
     }
 
     @Override

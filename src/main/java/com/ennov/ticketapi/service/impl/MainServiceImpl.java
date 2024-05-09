@@ -54,15 +54,11 @@ public class MainServiceImpl implements MainService {
     }
 
     public User removeAdmin(Long id){
-        User user = userRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("User not found with id "+id)
-        );
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found with id "+id));
         if(user.isDefaultUser())
             throw new APIException("You cannot change the default user role");
 
-        Role role = roleRepository.getByName(ROLE_ADMIN).orElseThrow(
-                () -> new ResourceNotFoundException("role "+ROLE_ADMIN+" not found")
-        );
+        Role role = roleRepository.getByName(ROLE_ADMIN).orElseThrow(() -> new ResourceNotFoundException("role "+ROLE_ADMIN+" not found"));
         if(user.getRoles().contains(role)){
             user.getRoles().remove(role);
             return userRepository.save(user);

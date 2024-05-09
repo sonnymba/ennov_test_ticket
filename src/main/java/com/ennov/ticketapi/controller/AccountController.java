@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -33,13 +34,13 @@ public class AccountController {
 
 
     @Autowired
-    AuthenticationManager authManager;
+    private AuthenticationManager authManager;
 
     @Autowired
-    MainService mainService;
+    private MainService mainService;
 
     @Autowired
-    JwtUtils jwtUtils;
+    private JwtUtils jwtUtils;
 
 
     /**
@@ -95,7 +96,7 @@ public class AccountController {
 
 
     /**
-     * Retirer Admin à un User
+     * Retirer le rôme Admin à un User
      */
     @PutMapping("/{id}/remove-admin")
     public ResponseEntity<LiteUserDTO> removeAdmin(@PathVariable Long id) {
@@ -104,9 +105,5 @@ public class AccountController {
         LiteUserDTO userDTO = new LiteUserDTO(user);
         return ResponseEntity.ok(userDTO);
     }
-
-
-
-
 
 }
