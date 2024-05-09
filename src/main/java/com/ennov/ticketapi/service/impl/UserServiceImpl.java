@@ -23,8 +23,8 @@ import java.util.*;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
+    public static final String ROLE_USER = "ROLE_USER";
     private final UserRepository repository;
-
     private  final RoleRepository roleRepository;
     private  final PrivilegeRepository privilegeRepository;
 
@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        Role role = createRoleIfNotFound("ROLE_USER");
+        Role role = roleRepository.findByName(ROLE_USER);
         user.setRoles(Collections.singletonList(role));
         user.setEnabled(true);
         user.setDefaultUser(false);
@@ -83,26 +83,6 @@ public class UserServiceImpl implements UserService {
         User user = getOne(id);
         repository.delete(user);
     }
-
-
-    Role createRoleIfNotFound(String name) {
-        List<Privilege> privileges = Collections.singletonList(createPrivilegeIfNotFound("READ_PRIVILEGE"));
-        Role role = roleRepository.findByName(name);
-        if (role == null) {
-            role = new Role(name);
-            role.setPrivileges(privileges);
-            roleRepository.save(role);
-        }
-        return role;
-    }
-
-    Privilege createPrivilegeIfNotFound(String name) {
-        return privilegeRepository.findByName(name).orElse(
-                privilegeRepository.save(new Privilege(name))
-        );
-
-    }
-
 }
 
 

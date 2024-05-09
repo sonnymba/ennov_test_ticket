@@ -1,5 +1,7 @@
 package com.ennov.ticketapi.service;
 
+import com.ennov.ticketapi.dao.PrivilegeRepository;
+import com.ennov.ticketapi.dao.RoleRepository;
 import com.ennov.ticketapi.dao.UserRepository;
 import com.ennov.ticketapi.dto.request.UserRequestDTO;
 import com.ennov.ticketapi.entities.Role;
@@ -22,15 +24,22 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-class UserServiceTest {
+class UserServiceTests {
 
     public static final String USERNAME = "testUser";
     public static final String EMAIL = "test@example.com";
     public static final String PASSWORD = "testPassword";
     public static final String ROLE_USER = "ROLE_USER";
     public static final long ID = 1L;
+
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PrivilegeRepository privilegeRepository;
+
+    @Mock
+    private RoleRepository roleRepository;
 
     @InjectMocks
     private UserServiceImpl userService;

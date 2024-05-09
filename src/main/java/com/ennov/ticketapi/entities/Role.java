@@ -1,6 +1,8 @@
 package com.ennov.ticketapi.entities;
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import java.util.Collection;
@@ -20,9 +22,11 @@ public class Role {
 
     private String name;
     @ManyToMany(mappedBy = "roles")
+    @JsonIgnore
     private Collection<User> users;
 
     @ManyToMany
+    @JsonIgnore
     @JoinTable(
             name = "roles_privileges",
             joinColumns = @JoinColumn(

@@ -36,7 +36,7 @@ public class Ticket{
         this.setId(dto.getId());
         this.setTitle(dto.getTitle());
         this.setDescription(dto.getDescription());
-        this.setStatus(Status.valueOf(dto.getStatus()));
+        this.setStatus(Status.fromText(dto.getStatus()));
     }
 
 }

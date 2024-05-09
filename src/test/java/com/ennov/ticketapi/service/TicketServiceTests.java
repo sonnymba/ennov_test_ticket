@@ -7,6 +7,7 @@ import com.ennov.ticketapi.entities.Ticket;
 import com.ennov.ticketapi.entities.User;
 import com.ennov.ticketapi.enums.Status;
 import com.ennov.ticketapi.exceptions.ResourceNotFoundException;
+import com.ennov.ticketapi.service.impl.MainServiceImpl;
 import com.ennov.ticketapi.service.impl.TicketServiceimpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,10 +22,11 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class TicketServiceTest {
+class TicketServiceTests {
 
     public static final long ID = 1L;
     public static final long ID_USER = ID;
+
     @Mock
     private TicketRepository ticketRepository;
 
@@ -33,8 +35,9 @@ class TicketServiceTest {
 
     @InjectMocks
     private TicketServiceimpl ticketService;
+
     @Mock
-    private MainService mainService;
+    private MainServiceImpl mainService;
 
     private Ticket ticket;
     private TicketRequestDTO ticketDto;

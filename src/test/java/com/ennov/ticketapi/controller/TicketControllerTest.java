@@ -4,38 +4,49 @@ import com.ennov.ticketapi.dto.request.TicketRequestDTO;
 
 import com.ennov.ticketapi.dto.response.TicketResponseDTO;
 import com.ennov.ticketapi.entities.Ticket;
+import com.ennov.ticketapi.enums.Status;
 import com.ennov.ticketapi.service.TicketService;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TicketControllerTest {
+    public static final String EN_COURS = "EN_COURS";
+    public static final String TEST_TITLE = "Test Title";
     @InjectMocks
     private TicketController ticketController;
 
     @Mock
     private TicketService ticketService;
 
+    private TicketRequestDTO dto;
+
+    private List<Ticket> tickets;
+
     @BeforeEach
-    public void setup() {}
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+        tickets = new ArrayList<>();
+    }
 
     @Test
     public void testList(){
         // Given
-        List<Ticket> tickets = Arrays.asList(new Ticket(), new Ticket());
+        tickets = Arrays.asList(new Ticket(), new Ticket());
         when(ticketService.getAll()).thenReturn(tickets);
 
         // When
@@ -65,8 +76,10 @@ public class TicketControllerTest {
     @Test
     public void testSave() {
         // Given
-        TicketRequestDTO dto = new TicketRequestDTO();
-        dto.setTitle("Test Title");
+        dto = new TicketRequestDTO();
+        dto.setTitle(TEST_TITLE);
+        dto.setStatus(EN_COURS);
+
         when(ticketService.save(dto)).thenReturn(new Ticket());
 
         // When
@@ -81,7 +94,8 @@ public class TicketControllerTest {
     public void testSave_TitleAlreadyExists() {
         // Given
         TicketRequestDTO dto = new TicketRequestDTO();
-        dto.setTitle("Test Title");
+        dto.setTitle(TEST_TITLE);
+        dto.setStatus(EN_COURS);
 
         // When
         ticketController.save(dto);
@@ -90,8 +104,10 @@ public class TicketControllerTest {
     @Test
     public void testUpdate() {
         // Given
+        dto = new TicketRequestDTO();
+        dto.setTitle(TEST_TITLE);
+        dto.setStatus(EN_COURS);
         Long id = 1L;
-        TicketRequestDTO dto = new TicketRequestDTO();
         dto.setId(id);
         when(ticketService.update(id, dto)).thenReturn(new Ticket());
 

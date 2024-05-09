@@ -1,6 +1,8 @@
 package com.ennov.ticketapi.entities;
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import java.util.Collection;
@@ -21,6 +23,7 @@ public class Privilege {
     private String name;
 
     @ManyToMany(mappedBy = "privileges")
+    @JsonIgnore
     private Collection<Role> roles;
 
     public Privilege(String name){

@@ -4,15 +4,12 @@ import com.ennov.ticketapi.config.security.jwt.JwtUtils;
 import com.ennov.ticketapi.config.security.services.UserDetailsImpl;
 import com.ennov.ticketapi.dto.RoleDTO;
 import com.ennov.ticketapi.dto.request.AuthRequestDTO;
-import com.ennov.ticketapi.dto.request.UserRequestDTO;
 import com.ennov.ticketapi.dto.response.JwtResponse;
 import com.ennov.ticketapi.dto.response.LiteUserDTO;
-import com.ennov.ticketapi.entities.Role;
 import com.ennov.ticketapi.entities.User;
 import com.ennov.ticketapi.exceptions.APIException;
 import com.ennov.ticketapi.exceptions.AuthenticationException;
 import com.ennov.ticketapi.service.MainService;
-import com.ennov.ticketapi.utils.MyUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
