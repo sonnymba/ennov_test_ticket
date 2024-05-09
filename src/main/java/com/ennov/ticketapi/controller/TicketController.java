@@ -32,7 +32,7 @@ public class TicketController{
     /**
      * Récupérer tous les tickets.
      */
-    @GetMapping
+    @GetMapping("/admin")
     public ResponseEntity<List<TicketResponseDTO>> list() {
         List<Ticket> tickets = service.getAll();
         List<TicketResponseDTO> dtos = tickets.stream().map(TicketResponseDTO::new).collect(Collectors.toList());

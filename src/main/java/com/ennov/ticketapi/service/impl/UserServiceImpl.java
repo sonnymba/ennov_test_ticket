@@ -1,33 +1,39 @@
 package com.ennov.ticketapi.service.impl;
 
+import com.ennov.ticketapi.dao.PrivilegeRepository;
+import com.ennov.ticketapi.dao.RoleRepository;
 import com.ennov.ticketapi.dao.UserRepository;
 import com.ennov.ticketapi.dto.request.UserRequestDTO;
+import com.ennov.ticketapi.entities.Privilege;
+import com.ennov.ticketapi.entities.Role;
 import com.ennov.ticketapi.entities.User;
 import com.ennov.ticketapi.exceptions.APIException;
 import com.ennov.ticketapi.exceptions.ResourceNotFoundException;
 import com.ennov.ticketapi.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @Transactional
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-    @Autowired
     private final UserRepository repository;
+
+    private  final RoleRepository roleRepository;
+    private  final PrivilegeRepository privilegeRepository;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
-    public UserServiceImpl(UserRepository repository) {
+    public UserServiceImpl(UserRepository repository, RoleRepository roleRepository, PrivilegeRepository privilegeRepository) {
         this.repository = repository;
+        this.roleRepository = roleRepository;
+        this.privilegeRepository = privilegeRepository;
     }
 
     @Override
@@ -38,7 +44,10 @@ public class UserServiceImpl implements UserService {
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
-
+        Role role = createRoleIfNotFound("ROLE_USER");
+        user.setRoles(Collections.singletonList(role));
+        user.setEnabled(true);
+        user.setDefaultUser(false);
         return repository.save(user);
     }
 
@@ -76,6 +85,23 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    Role createRoleIfNotFound(String name) {
+        List<Privilege> privileges = Collections.singletonList(createPrivilegeIfNotFound("READ_PRIVILEGE"));
+        Role role = roleRepository.findByName(name);
+        if (role == null) {
+            role = new Role(name);
+            role.setPrivileges(privileges);
+            roleRepository.save(role);
+        }
+        return role;
+    }
+
+    Privilege createPrivilegeIfNotFound(String name) {
+        return privilegeRepository.findByName(name).orElse(
+                privilegeRepository.save(new Privilege(name))
+        );
+
+    }
 
 }
 

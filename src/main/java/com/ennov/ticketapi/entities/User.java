@@ -43,6 +43,8 @@ public class User implements UserDetails {
 
 
     private boolean enabled;
+    private boolean defaultUser = false;
+
 
 
 

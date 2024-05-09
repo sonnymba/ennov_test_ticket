@@ -23,7 +23,7 @@ import java.util.List;
 public class SetupDataLoader implements ApplicationListener<ContextRefreshedEvent> {
 
     public static final String USERNAME = "admin";
-    public static final String INPUT_STRING = System.getenv("SECRET");
+    public static final String INPUT_STRING = "admin";//System.getenv("SECRET");
     public static final String EMAIL = "admin@test.com";
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
     public static final String ROLE_USER = "ROLE_USER";
@@ -47,7 +47,6 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
     @Override
     @Transactional
     public void onApplicationEvent(ContextRefreshedEvent event) {
-
         if(userRepository.findByEmail(EMAIL).isPresent()){
             alreadySetup = true;
         }
@@ -70,6 +69,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         user.setEmail(EMAIL);
         user.setRoles(Collections.singletonList(adminRole));
         user.setEnabled(true);
+        user.setDefaultUser(true);
         userRepository.save(user);
 
         alreadySetup = true;

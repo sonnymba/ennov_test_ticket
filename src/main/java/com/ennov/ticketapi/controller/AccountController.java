@@ -2,9 +2,17 @@ package com.ennov.ticketapi.controller;
 
 import com.ennov.ticketapi.config.security.jwt.JwtUtils;
 import com.ennov.ticketapi.config.security.services.UserDetailsImpl;
+import com.ennov.ticketapi.dto.RoleDTO;
 import com.ennov.ticketapi.dto.request.AuthRequestDTO;
+import com.ennov.ticketapi.dto.request.UserRequestDTO;
 import com.ennov.ticketapi.dto.response.JwtResponse;
+import com.ennov.ticketapi.dto.response.LiteUserDTO;
+import com.ennov.ticketapi.entities.Role;
+import com.ennov.ticketapi.entities.User;
+import com.ennov.ticketapi.exceptions.APIException;
 import com.ennov.ticketapi.exceptions.AuthenticationException;
+import com.ennov.ticketapi.service.MainService;
+import com.ennov.ticketapi.utils.MyUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,10 +37,17 @@ public class AccountController {
 
     @Autowired
     AuthenticationManager authManager;
+
+    @Autowired
+    MainService mainService;
+
     @Autowired
     JwtUtils jwtUtils;
 
 
+    /**
+     * Login
+     */
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid AuthRequestDTO request) {
@@ -58,6 +73,41 @@ public class AccountController {
             throw new AuthenticationException(ex.getMessage());
         }
     }
+
+    /**
+     * Lister les roles de rôle
+     */
+    @GetMapping("/roles")
+    public ResponseEntity<List<RoleDTO>> roles() {
+        List<RoleDTO> roles = mainService.getRoles().stream().map(RoleDTO::new).collect(Collectors.toList());
+        return ResponseEntity.ok(roles);
+    }
+
+
+    /**
+     * Nommer un User Admin
+     */
+    @PutMapping("/{id}/make-admin")
+    public ResponseEntity<LiteUserDTO> makeAdmin(@PathVariable Long id) {
+        if(id == null) throw new APIException("id is required");
+
+        User user = mainService.makeAdmin(id);
+        LiteUserDTO userDTO = new LiteUserDTO(user);
+        return ResponseEntity.ok(userDTO);
+    }
+
+
+    /**
+     * Retirer Admin à un User
+     */
+    @PutMapping("/{id}/remove-admin")
+    public ResponseEntity<LiteUserDTO> removeAdmin(@PathVariable Long id) {
+        if(id == null) throw new APIException("id is required");
+        User user = mainService.removeAdmin(id);
+        LiteUserDTO userDTO = new LiteUserDTO(user);
+        return ResponseEntity.ok(userDTO);
+    }
+
 
 
 

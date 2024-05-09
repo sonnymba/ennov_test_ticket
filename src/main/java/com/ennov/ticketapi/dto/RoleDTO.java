@@ -1,6 +1,7 @@
 package com.ennov.ticketapi.dto;
 
 
+import com.ennov.ticketapi.entities.Role;
 import lombok.*;
 
 
@@ -12,4 +13,10 @@ import lombok.*;
 public class RoleDTO{
     private Long id;
     private String name;
+
+    public RoleDTO(Role role) {
+        if(role != null)
+        this.id = role.getId();
+        this.name = role.getName();
+    }
 }

@@ -70,8 +70,7 @@ public class ApplicationSecurity {
             "/configuration/security",
 
             // Public routes
-            "/api/public/**",
-            "/api/account/**",
+            "/api/account/login",
 
             // Report paths downloading
             "/app/generated-reports/**",
@@ -80,6 +79,12 @@ public class ApplicationSecurity {
             "/generated-reports/**"
     };
 
+    private static final String[] ADMIN_ROUTE = {
+            "/api/tickets/admin",
+            "/api/account/{id}/make-admin",
+            "/api/account/{id}/remove-admin",
+            "/api/account/roles",
+    };
 
 
     @Bean
@@ -91,7 +96,7 @@ public class ApplicationSecurity {
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests().antMatchers(AUTH_WHITELIST).permitAll()
-                .antMatchers("/api/admin/**").hasRole("ADMIN")
+                .antMatchers(ADMIN_ROUTE).hasRole("ADMIN")
                 .anyRequest().authenticated();
 
         http.authenticationProvider(authenticationProvider());
