@@ -6,10 +6,12 @@ import com.ennov.ticketapi.dao.UserRepository;
 import com.ennov.ticketapi.dto.request.UserRequestDTO;
 import com.ennov.ticketapi.entities.Role;
 import com.ennov.ticketapi.entities.User;
+import com.ennov.ticketapi.exceptions.APIException;
 import com.ennov.ticketapi.exceptions.ResourceNotFoundException;
 import com.ennov.ticketapi.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -143,4 +146,24 @@ class UserServiceTests {
         when(userRepository.findById(ID)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> userService.delete(ID));
     }
+
+    @Test
+     void testSaveWithExistingUsername() {
+        UserRequestDTO dto = new UserRequestDTO();
+        dto.setUsername("existingUser");
+        when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
+        APIException exception = assertThrows(APIException.class, () -> userService.save(dto));
+        assertThat(exception.getMessage()).isEqualTo("This username is already in use");
+    }
+
+    @Test
+     void testSaveWithExistingEmail() {
+        UserRequestDTO dto = new UserRequestDTO();
+        dto.setEmail("existingUser@email.com");
+        when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
+        APIException exception = assertThrows(APIException.class, () -> userService.save(dto));
+        assertThat(exception.getMessage()).isEqualTo("This email is already in use");
+    }
+
+
 }

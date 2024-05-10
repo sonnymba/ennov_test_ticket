@@ -11,7 +11,6 @@ import com.ennov.ticketapi.service.UserService;
 import com.ennov.ticketapi.utils.MyUtils;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,11 +27,14 @@ public class UserController {
 
     private static final String USER_ENDPOINT = "/tickets/";
 
-    @Autowired
-    private UserService service;
+    private final UserService service;
 
-    @Autowired
-    private TicketService ticketService;
+    private final TicketService ticketService;
+
+    public UserController(UserService service, TicketService ticketService) {
+        this.service = service;
+        this.ticketService = ticketService;
+    }
 
     /**
      * Récupérer tous les utilisateurs
@@ -49,7 +51,7 @@ public class UserController {
      */
     @GetMapping("/{id}/ticket")
     public ResponseEntity<List<LiteTicketDTO>> listAssignedTicketToUser(@PathVariable(name = "id") Long id) {
-        if(id == null) throw new APIException("Id is required");
+        if(id == null) throw new APIException("id is required");
         List<Ticket> tickets = ticketService.listAssignedToUser(id);
         List<LiteTicketDTO> dtos = tickets.stream().map(LiteTicketDTO::new).collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
@@ -61,7 +63,7 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<LiteUserDTO> save(@RequestBody @Valid UserRequestDTO dto) {
-        if(!MyUtils.isValidEmailAddress(dto.getEmail())) throw new APIException("Email invalid");
+        if(!MyUtils.isValidEmailAddress(dto.getEmail())) throw new IllegalArgumentException("Email invalid");
         User persistedUser = service.save(dto);
         LiteUserDTO userDTO = new LiteUserDTO(persistedUser);
         URI uri = URI.create(USER_ENDPOINT + userDTO.getId());
@@ -73,8 +75,8 @@ public class UserController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<LiteUserDTO> update(@PathVariable Long id, @RequestBody @Valid UserRequestDTO dto) {
-        if(id == null) throw new APIException("Id is required");
-        if(!MyUtils.isValidEmailAddress(dto.getEmail())) throw new APIException("Email invalid");
+        if(id == null) throw new APIException("id is required");
+        if(!MyUtils.isValidEmailAddress(dto.getEmail())) throw new IllegalArgumentException("Email invalid");
         dto.setId(id);
         User persistedUser = service.update(id, dto);
         LiteUserDTO userDTO = new LiteUserDTO(persistedUser);

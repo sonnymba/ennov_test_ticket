@@ -13,4 +13,9 @@ public class UserRequestDTO {
     private String username;
     private String email;
     private String password;
+
+    public UserRequestDTO(String username, String email) {
+        this.username = username;
+        this.email = email;
+    }
 }

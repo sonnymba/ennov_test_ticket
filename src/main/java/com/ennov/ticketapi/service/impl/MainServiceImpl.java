@@ -9,7 +9,6 @@ import com.ennov.ticketapi.exceptions.ResourceNotFoundException;
 
 import com.ennov.ticketapi.service.MainService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,21 +25,23 @@ public class MainServiceImpl implements MainService {
 
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
 
-    @Autowired
-    public UserRepository userRepository;
+    public final UserRepository userRepository;
 
-    @Autowired
-    public RoleRepository roleRepository;
+    public final RoleRepository roleRepository;
+
+    public MainServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+    }
+
 
     public User getCurrentUser() throws ResourceNotFoundException{
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
-            return new User();
+            return null;
         }
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
-        return  userRepository.findByUsername(userPrincipal.getUsername()).orElseThrow(
-                () ->  new ResourceNotFoundException("User not found with username " + userPrincipal.getUsername())
-        );
+        return  userRepository.findByUsername(userPrincipal.getUsername()).orElse(null);
     }
 
     public User makeAdmin(Long id) {

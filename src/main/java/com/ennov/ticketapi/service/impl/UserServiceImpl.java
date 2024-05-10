@@ -22,6 +22,7 @@ import java.util.*;
 public class UserServiceImpl implements UserService {
 
     public static final String ROLE_USER = "ROLE_USER";
+
     private final UserRepository repository;
     private  final RoleRepository roleRepository;
 

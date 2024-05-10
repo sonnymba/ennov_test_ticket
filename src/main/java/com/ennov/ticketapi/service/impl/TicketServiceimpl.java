@@ -12,7 +12,6 @@ import com.ennov.ticketapi.service.MainService;
 import com.ennov.ticketapi.service.TicketService;
 import javax.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,27 +21,25 @@ import java.util.List;
 @Slf4j
 public class TicketServiceimpl implements TicketService {
 
-    @Autowired
-    TicketRepository ticketRepository;
+    private final TicketRepository ticketRepository;
 
-    @Autowired
-    UserRepository userRepository;
 
-    @Autowired
-    MainService mainService;
+    private final UserRepository userRepository;
+
+    private final MainService mainService;
+
+    public TicketServiceimpl(TicketRepository ticketRepository, UserRepository userRepository, MainService mainService) {
+        this.ticketRepository = ticketRepository;
+        this.userRepository = userRepository;
+        this.mainService = mainService;
+    }
 
     @Override
     public Ticket save(TicketRequestDTO dto) {
-        try{
-            if(exitbyTitle(dto.getTitle())) throw new APIException("Ticket with title already exists");
-            Ticket ticket = new Ticket(dto);
-            ticket.setAssignedTo(mainService.getCurrentUser());
-            return  ticketRepository.save(ticket);
-
-        }catch (Exception e){
-            throw new APIException(e.getMessage());
-        }
-
+        if(exitbyTitle(dto.getTitle())) throw new APIException("Ticket with title already exists");
+        Ticket ticket = new Ticket(dto);
+        ticket.setAssignedTo(mainService.getCurrentUser());
+        return  ticketRepository.save(ticket);
     }
 
     @Override
@@ -77,7 +74,7 @@ public class TicketServiceimpl implements TicketService {
     public Ticket assignTicketToUser(Long id, Long userId) {
         Ticket ticket = getOne(id);
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new ResourceNotFoundException("User not found with id "+userId)
+                () -> new ResourceNotFoundException("This user not found")
         );
         ticket.setAssignedTo(user);
         return ticketRepository.save(ticket);

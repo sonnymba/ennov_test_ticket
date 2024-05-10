@@ -10,7 +10,6 @@ import com.ennov.ticketapi.exceptions.APIException;
 import com.ennov.ticketapi.service.TicketService;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,8 +26,12 @@ public class TicketController{
 
     private static final String TICKET_ENDPOINT = "/tickets/";
 
-    @Autowired
-    private TicketService service;
+    private final TicketService service;
+
+    public TicketController(TicketService service) {
+        this.service = service;
+    }
+
 
     /**
      * Récupérer tous les tickets.
@@ -58,8 +61,6 @@ public class TicketController{
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<TicketResponseDTO> save(@RequestBody @Valid TicketRequestDTO dto) {
         if(service.exitbyTitle(dto.getTitle())) throw new APIException("title is already exist.");
-        if(Enum.valueOf(Status.class, dto.getStatus()) == null)
-            throw new APIException("Enum "+dto.getStatus()+" not found. Use one of EN_COURS, TERMINE, ANNULE");
         Ticket ticket = service.save(dto);
         TicketResponseDTO ticketDTO = new TicketResponseDTO(ticket);
         URI uri = URI.create(TICKET_ENDPOINT + ticketDTO.getId());
@@ -73,8 +74,6 @@ public class TicketController{
     public ResponseEntity<TicketResponseDTO> update(@PathVariable(name = "id")  Long id, @RequestBody @Valid TicketRequestDTO dto) {
         if(id == null) throw new APIException("id is required");
         dto.setId(id);
-        if(Enum.valueOf(Status.class, dto.getStatus()) == null)
-            throw new APIException("Enum "+dto.getStatus()+" not found. Use one of EN_COURS, TERMINE, ANNULE");
         Ticket ticket = service.update(id, dto);
         TicketResponseDTO ticketDTO = new TicketResponseDTO(ticket);
         return ResponseEntity.ok(ticketDTO);
@@ -102,15 +101,6 @@ public class TicketController{
         if(id == null) throw new APIException("id is required");
         service.delete(id);
         return ResponseEntity.noContent().build();
-    }
-
-    public boolean doesEnumExist(Class<? extends Enum<?>> enumClass, String enumName) {
-        try {
-            Enum.valueOf(Status.class, enumName);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
     }
 
 }

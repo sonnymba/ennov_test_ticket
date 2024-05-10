@@ -8,6 +8,7 @@ import com.ennov.ticketapi.dto.response.JwtResponse;
 import com.ennov.ticketapi.dto.response.LiteUserDTO;
 import com.ennov.ticketapi.entities.Role;
 import com.ennov.ticketapi.entities.User;
+import com.ennov.ticketapi.exceptions.APIException;
 import com.ennov.ticketapi.exceptions.AuthenticationException;
 import com.ennov.ticketapi.service.MainService;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,13 +25,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -40,6 +39,7 @@ public class AccountControllerTest {
 
     public static final String ROLE_USER = "ROLE_USER";
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
+
     @Mock
     private AuthenticationManager authManager;
 
@@ -53,12 +53,13 @@ public class AccountControllerTest {
     private AccountController accountController;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         MockitoAnnotations.initMocks(this);
+        this.accountController = new AccountController(authManager, mainService, jwtUtils);
     }
 
     @Test
-    public void testLogin() {
+     void testLogin() {
         // Set up authentication token
         String username = "testuser";
         String password = "testpassword";
@@ -79,25 +80,25 @@ public class AccountControllerTest {
         ResponseEntity<?> response = accountController.login(request);
 
         // Verify response
-        assertEquals(200, response.getStatusCodeValue());
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
         JwtResponse jwtResponse = (JwtResponse) response.getBody();
         assertNotNull(jwtResponse);
-        assertNotEquals(jwtResponse.getAccessToken(), empty());
-        assertEquals("Bearer", jwtResponse.getType());
+        assertThat(jwtResponse.getAccessToken()).isNotEqualTo("");
+        assertThat(jwtResponse.getType()).isEqualTo("Bearer");
         assertNotNull(jwtResponse.getId());
         assertEquals(username, jwtResponse.getUsername());
         List<String> roles = jwtResponse.getRoles();
-        assertNotEquals(roles, empty());
+        assertNotNull(roles);
 
         // Verify authentication manager was called
         verify(authManager, times(1))
-                .authenticate(eq(new UsernamePasswordAuthenticationToken(username, password)));
+                .authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
         // Verify JWT utils was called
         verify(jwtUtils, times(1)).generateJwtToken(authentication);
     }
     @Test
-    public void testLogin_BadCredentialsException() {
+     void testLogin_BadCredentialsException() {
         // Set up authentication token
         String username = "testuser";
         String password = "testpassword";
@@ -114,14 +115,14 @@ public class AccountControllerTest {
 
         // Verify authentication manager was called
         verify(authManager, times(1))
-                .authenticate(eq(new UsernamePasswordAuthenticationToken(username, password)));
+                .authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
         // Verify JWT utils was not called
         verify(jwtUtils, times(0)).generateJwtToken(any(Authentication.class));
     }
 
     @Test
-    public void testRoles() {
+     void testRoles() {
         // Set up roles
         List<Role> roles = Arrays.asList(
                 new Role(ROLE_USER),
@@ -134,9 +135,10 @@ public class AccountControllerTest {
         ResponseEntity<List<RoleDTO>> response = accountController.roles();
 
         // Verify response
-        assertEquals(200, response.getStatusCodeValue());
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
         List<RoleDTO> responseRoles = response.getBody();
-        assertEquals(2, responseRoles.size());
+        assertNotNull(responseRoles);
+        assertThat(responseRoles).hasSize(2);
 
         // Verify main service was called
         verify(mainService, times(1))
@@ -144,7 +146,7 @@ public class AccountControllerTest {
     }
 
     @Test
-    public void testMakeAdmin() {
+     void testMakeAdmin() {
         // Set up user
         Long id = 1L;
         User user = new User();
@@ -155,8 +157,9 @@ public class AccountControllerTest {
         ResponseEntity<LiteUserDTO> response = accountController.makeAdmin(id);
 
         // Verify response
-        assertEquals(200, response.getStatusCodeValue());
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
         LiteUserDTO userDTO = response.getBody();
+        assertNotNull(userDTO);
         assertEquals(id, userDTO.getId());
 
         // Verify main service was called
@@ -165,7 +168,7 @@ public class AccountControllerTest {
     }
 
     @Test
-    public void testRemoveAdmin() {
+     void testRemoveAdmin() {
         // Set up user
         Long id = 1L;
         User user = new User();
@@ -176,12 +179,28 @@ public class AccountControllerTest {
         ResponseEntity<LiteUserDTO> response = accountController.removeAdmin(id);
 
         // Verify response
-        assertEquals(200, response.getStatusCodeValue());
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
         LiteUserDTO userDTO = response.getBody();
+        assertNotNull(userDTO);
         assertEquals(id, userDTO.getId());
 
         // Verify main service was called
-        verify(mainService, times(1))
-                .removeAdmin(id);
+        verify(mainService, times(1)).removeAdmin(id);
     }
+
+    @Test
+    void makeAdmin_throwsAPIException() {
+        Long id = null;
+        APIException exception = assertThrows(APIException.class, () -> accountController.makeAdmin(id));
+
+        assertThat(exception.getMessage()).isEqualTo("id is required");
+    }
+    @Test
+    void remove_throwsAPIException() {
+        Long id = null;
+        APIException exception = assertThrows(APIException.class, () -> accountController.removeAdmin(id));
+
+        assertThat(exception.getMessage()).isEqualTo("id is required");
+    }
+
 }

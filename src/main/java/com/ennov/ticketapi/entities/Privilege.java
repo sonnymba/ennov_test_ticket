@@ -5,6 +5,7 @@ import javax.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 
@@ -14,7 +15,8 @@ import java.util.Collection;
 @Setter
 @ToString
 @Entity
-public class Privilege {
+public class Privilege implements Serializable {
+    private static final long serialVersionUID = 1905122041950251207L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

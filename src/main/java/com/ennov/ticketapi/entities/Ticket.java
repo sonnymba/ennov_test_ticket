@@ -3,8 +3,10 @@ package com.ennov.ticketapi.entities;
 import com.ennov.ticketapi.dto.request.TicketRequestDTO;
 import com.ennov.ticketapi.enums.Status;
 import javax.persistence.*;
-import lombok.*;
+import javax.validation.Valid;
 
+import lombok.*;
+import org.hibernate.annotations.NotFound;
 
 
 @NoArgsConstructor
@@ -33,10 +35,12 @@ public class Ticket{
     private Status status;
 
     public Ticket(TicketRequestDTO dto){
-        this.setId(dto.getId());
-        this.setTitle(dto.getTitle());
-        this.setDescription(dto.getDescription());
-        this.setStatus(Status.fromText(dto.getStatus()));
+        if(dto != null){
+            this.setId(dto.getId());
+            this.setTitle(dto.getTitle());
+            this.setDescription(dto.getDescription());
+            this.setStatus(Status.valueOf(dto.getStatus()));
+        }
     }
 
 }

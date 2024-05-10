@@ -15,8 +15,9 @@ public class RoleDTO{
     private String name;
 
     public RoleDTO(Role role) {
-        if(role != null)
-        this.id = role.getId();
-        this.name = role.getName();
+        if(role != null) {
+            this.id = role.getId();
+            this.name = role.getName();
+        }
     }
 }

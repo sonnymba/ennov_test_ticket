@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 @Inheritance(strategy = InheritanceType.JOINED)
 @Entity
 public class User implements UserDetails {
+    private static final long serialVersionUID = 1905122041950251207L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,6 +59,8 @@ public class User implements UserDetails {
     private Collection<Role> roles = new ArrayList<>();
 
     private boolean tokenExpired;
+
+
 
     //userDetails
     @Override

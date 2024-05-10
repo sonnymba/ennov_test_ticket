@@ -6,7 +6,9 @@ import com.ennov.ticketapi.dto.request.TicketRequestDTO;
 import com.ennov.ticketapi.entities.Ticket;
 import com.ennov.ticketapi.entities.User;
 import com.ennov.ticketapi.enums.Status;
+import com.ennov.ticketapi.exceptions.APIException;
 import com.ennov.ticketapi.exceptions.ResourceNotFoundException;
+import com.ennov.ticketapi.exceptions.UserNotFoundException;
 import com.ennov.ticketapi.service.impl.MainServiceImpl;
 import com.ennov.ticketapi.service.impl.TicketServiceimpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -146,5 +149,44 @@ class TicketServiceTests {
         List<Ticket> tickets = ticketService.listAssignedToUser(ID);
         assertEquals(ticketList, tickets);
         verify(ticketRepository, times(1)).findByAssignedTo(user);
+    }
+
+    @Test
+     void testAssignTicketToUser_WithNullId() {
+        Long id = null;
+        Long userId = 123L;
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> ticketService.assignTicketToUser(id, userId));
+        assertThat(exception.getMessage()).isNotNull();
+    }
+
+    @Test
+    void testAssignTicketToUser_WithNullUserId() {
+        Long id = 12L;
+        Long userId = null;
+        Ticket ticket = new Ticket();
+        ticket.setId(id);
+        ticket.setTitle("test tite");
+        when(ticketRepository.findById(id)).thenReturn(Optional.of(ticket));
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> ticketService.assignTicketToUser(id, userId));
+        assertThat(exception.getMessage()).isEqualTo("This user not found");
+    }
+
+
+
+    @Test
+     void testListAssignedToUser_WithNullUserId() {
+        Long userId = null;
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> ticketService.listAssignedToUser(userId));
+        assertThat(exception.getMessage()).isEqualTo("User not found with id "+userId);
+    }
+
+
+    @Test
+     void testSave_WithExistTitle() {
+        TicketRequestDTO dto = new TicketRequestDTO();
+        dto.setTitle("Existing Title");
+        when(ticketRepository.getByTitle(dto.getTitle())).thenReturn(Optional.of(ticket));
+        APIException exception = assertThrows(APIException.class, () -> ticketService.save(dto));
+        assertThat(exception.getMessage()).isEqualTo("Ticket with title already exists");
     }
 }

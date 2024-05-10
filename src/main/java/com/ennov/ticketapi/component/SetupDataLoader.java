@@ -8,6 +8,7 @@ import com.ennov.ticketapi.entities.Role;
 import com.ennov.ticketapi.entities.User;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -23,14 +24,27 @@ import java.util.List;
 public class SetupDataLoader implements ApplicationListener<ContextRefreshedEvent> {
 
     public static final String USERNAME = "admin";
-    public static final String INPUT_STRING = "admin";//System.getenv("SECRET");
     public static final String EMAIL = "admin@test.com";
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
     public static final String ROLE_USER = "ROLE_USER";
     public static final String READ_PRIVILEGE = "READ_PRIVILEGE";
     public static final String WRITE_PRIVILEGE = "WRITE_PRIVILEGE";
-    boolean alreadySetup = false;
+
+    private  boolean alreadySetup = false;
+
+    public boolean isAlreadySetup() {
+        return alreadySetup;
+    }
+
+    public void setAlreadySetup(boolean alreadySetup) {
+        this.alreadySetup = alreadySetup;
+    }
+
+
     private final UserRepository userRepository;
+
+    @Value("${user.secret}")
+    private String secret;
 
     private final RoleRepository roleRepository;
     private final PrivilegeRepository privilegeRepository;
@@ -48,12 +62,11 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
     @Transactional
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if(userRepository.findByEmail(EMAIL).isPresent()){
-            alreadySetup = true;
-            //System.out.println(privilegeRepository.findAll());
+            setAlreadySetup(true);
         }
 
 
-        if (alreadySetup)
+        if (isAlreadySetup())
             return;
         Privilege readPrivilege = createPrivilegeIfNotFound(READ_PRIVILEGE);
         Privilege writePrivilege = createPrivilegeIfNotFound(WRITE_PRIVILEGE);
@@ -66,14 +79,14 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         Role adminRole = roleRepository.findByName(ROLE_ADMIN);
         User user = new User();
         user.setUsername(USERNAME);
-        user.setPassword(passwordEncoder.encode(INPUT_STRING));
+        user.setPassword(passwordEncoder.encode(secret));
         user.setEmail(EMAIL);
         user.setRoles(Collections.singletonList(adminRole));
         user.setEnabled(true);
         user.setDefaultUser(true);
         userRepository.save(user);
 
-        alreadySetup = true;
+        setAlreadySetup(true);
     }
 
     @Transactional

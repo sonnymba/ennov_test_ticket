@@ -11,11 +11,9 @@ import com.ennov.ticketapi.exceptions.APIException;
 import com.ennov.ticketapi.exceptions.AuthenticationException;
 import com.ennov.ticketapi.service.MainService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -33,14 +31,17 @@ import java.util.stream.Collectors;
 public class AccountController {
 
 
-    @Autowired
-    private AuthenticationManager authManager;
+    private final AuthenticationManager authManager;
 
-    @Autowired
-    private MainService mainService;
+    private final MainService mainService;
 
-    @Autowired
-    private JwtUtils jwtUtils;
+    private final JwtUtils jwtUtils;
+
+    public AccountController(AuthenticationManager authManager, MainService mainService, JwtUtils jwtUtils) {
+        this.authManager = authManager;
+        this.mainService = mainService;
+        this.jwtUtils = jwtUtils;
+    }
 
 
     /**

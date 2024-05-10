@@ -1,148 +1,204 @@
 package com.ennov.ticketapi.controller;
 
 import com.ennov.ticketapi.dto.request.TicketRequestDTO;
-
 import com.ennov.ticketapi.dto.response.TicketResponseDTO;
 import com.ennov.ticketapi.entities.Ticket;
+import com.ennov.ticketapi.entities.User;
 import com.ennov.ticketapi.enums.Status;
+import com.ennov.ticketapi.exceptions.APIException;
 import com.ennov.ticketapi.service.TicketService;
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class TicketControllerTest {
-    public static final String EN_COURS = "EN_COURS";
-    public static final String TEST_TITLE = "Test Title";
-    @InjectMocks
-    private TicketController ticketController;
+@ExtendWith(MockitoExtension.class)
+class TicketControllerTest {
 
     @Mock
     private TicketService ticketService;
 
-    private TicketRequestDTO dto;
-
-    private List<Ticket> tickets;
+    @InjectMocks
+    private TicketController ticketController;
 
     @BeforeEach
-    public void setup() {
+    void setUp() {
         MockitoAnnotations.initMocks(this);
-        tickets = new ArrayList<>();
+        ticketController = new TicketController(ticketService);
     }
 
     @Test
-    public void testList(){
-        // Given
-        tickets = Arrays.asList(new Ticket(), new Ticket());
+    void list() {
+        List<Ticket> tickets = Arrays.asList(new Ticket(), new Ticket());
         when(ticketService.getAll()).thenReturn(tickets);
 
-        // When
         ResponseEntity<List<TicketResponseDTO>> response = ticketController.list();
 
-        // Then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(2, response.getBody().size());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).hasSize(2);
     }
 
     @Test
-    public void testGetOne() {
-        // Given
+    void testGetOne() {
         Long id = 1L;
         Ticket ticket = new Ticket();
         when(ticketService.getOne(id)).thenReturn(ticket);
 
-        // When
         ResponseEntity<TicketResponseDTO> response = ticketController.getOne(id);
 
-        // Then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        assertThat(Objects.requireNonNull(response.getBody()).getId()).isEqualTo(ticket.getId());
     }
 
     @Test
-    public void testSave() {
-        // Given
-        dto = new TicketRequestDTO();
-        dto.setTitle(TEST_TITLE);
-        dto.setStatus(EN_COURS);
+     void testSave() {
+        TicketRequestDTO dto = new TicketRequestDTO();
+        dto.setTitle("Test Ticket");
+        dto.setStatus(Status.EN_COURS.name());
+        Ticket savedTicket = new Ticket();
+        savedTicket.setId(1L);
+        savedTicket.setTitle("Test Ticket");
+        savedTicket.setStatus(Status.EN_COURS);
+        when(ticketService.save(dto)).thenReturn(savedTicket);
 
-        when(ticketService.save(dto)).thenReturn(new Ticket());
-
-        // When
         ResponseEntity<TicketResponseDTO> response = ticketController.save(dto);
 
-        // Then
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertNotNull(response.getBody());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(Objects.requireNonNull(response.getBody()).getId()).isEqualTo(savedTicket.getId());
     }
 
     @Test
-    public void testSave_TitleAlreadyExists() {
-        // Given
+    void getOne_throwsAPIException() {
+        Long id = null;
+
+        APIException exception = assertThrows(APIException.class, () -> ticketController.getOne(id));
+
+        assertThat(exception.getMessage()).isEqualTo("id is required");
+    }
+
+
+    @Test
+    void save_throwsAPIException() {
         TicketRequestDTO dto = new TicketRequestDTO();
-        dto.setTitle(TEST_TITLE);
-        dto.setStatus(EN_COURS);
+        dto.setTitle("existing title");
+        when(ticketService.exitbyTitle(dto.getTitle())).thenReturn(true);
 
-        // When
-        ticketController.save(dto);
+        APIException exception = assertThrows(APIException.class, () -> ticketController.save(dto));
+        assertThat(exception.getMessage()).isEqualTo("title is already exist.");
     }
 
     @Test
-    public void testUpdate() {
-        // Given
-        dto = new TicketRequestDTO();
-        dto.setTitle(TEST_TITLE);
-        dto.setStatus(EN_COURS);
+     void testUpdate() {
         Long id = 1L;
+        TicketRequestDTO dto = new TicketRequestDTO();
         dto.setId(id);
-        when(ticketService.update(id, dto)).thenReturn(new Ticket());
+        dto.setTitle("Updated Ticket");
+        dto.setStatus(Status.TERMINE.name());
+        Ticket updatedTicket = new Ticket();
+        updatedTicket.setId(id);
+        updatedTicket.setTitle("Updated Ticket");
+        updatedTicket.setStatus(Status.TERMINE);
+        when(ticketService.update(id, dto)).thenReturn(updatedTicket);
 
-        // When
         ResponseEntity<TicketResponseDTO> response = ticketController.update(id, dto);
 
-        // Then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(Objects.requireNonNull(response.getBody()).getId()).isEqualTo(response.getBody().getId());
     }
 
     @Test
-    public void testAssignTicketToUser() {
-        // Given
+     void testAssignTicketToUser() {
         Long id = 1L;
         Long userId = 2L;
-        when(ticketService.assignTicketToUser(id, userId)).thenReturn(new Ticket());
+        Ticket assignedTicket = new Ticket();
+        assignedTicket.setId(id);
 
-        // When
+        User user = new User();
+        user.setId(userId);
+        assignedTicket.setAssignedTo(user);
+
+        when(ticketService.assignTicketToUser(id, userId)).thenReturn(assignedTicket);
+
         ResponseEntity<TicketResponseDTO> response = ticketController.assignTicketToUser(id, userId);
 
-        // Then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(Objects.requireNonNull(response.getBody()).getId()).isEqualTo(response.getBody().getId());
+        assertThat(assignedTicket.getAssignedTo().getId()).isEqualTo(response.getBody().getAssignedTo().getId());
+        verify(ticketService, times(1)).assignTicketToUser(id, userId);
+    }
+    @Test
+     void testDelete() {
+        Long id = 1L;
+        doNothing().when(ticketService).delete(id);
+
+        ResponseEntity<Void> response = ticketController.delete(id);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
     @Test
-    public void testDelete() {
-        // Given
-        Long id = 1L;
+    void delete_throwsAPIException() {
+        Long id = null;
 
-        // When
-        ResponseEntity<Void> response = ticketController.delete(id);
+        APIException exception = assertThrows(APIException.class, () -> ticketController.delete(id));
 
-        // Then
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertThat(exception.getMessage()).isEqualTo("id is required");
     }
+
+    @Test
+     void testSave_TitleAlreadyExists() {
+        TicketRequestDTO dto = new TicketRequestDTO();
+        dto.setTitle("Test Ticket");
+        when(ticketService.exitbyTitle(dto.getTitle())).thenReturn(true);
+
+        assertThrows(APIException.class, () -> ticketController.save(dto));
+    }
+
+
+
+
+
+
+
+
+    @Test
+    void update_throwsAPIException() {
+        Long id = null;
+        TicketRequestDTO dto = new TicketRequestDTO();
+
+        APIException exception = assertThrows(APIException.class, () -> ticketController.update(id, dto));
+
+        assertThat(exception.getMessage()).isEqualTo("id is required");
+    }
+
+    @Test
+     void testAssignTicketToUser_WithNullId() {
+        Long id = null;
+        Long userId = 123L;
+        APIException exception = assertThrows(APIException.class, () -> ticketController.assignTicketToUser(id, userId));
+        assertThat(exception.getMessage()).isEqualTo("id is required");
+    }
+
+    @Test
+     void testAssignTicketToUser_WithNullUserId() {
+        Long id = 12L;
+        Long userId = null;
+        APIException exception = assertThrows(APIException.class, () -> ticketController.assignTicketToUser(id, userId));
+        assertThat(exception.getMessage()).isEqualTo("userId is required");
+    }
+
 }
