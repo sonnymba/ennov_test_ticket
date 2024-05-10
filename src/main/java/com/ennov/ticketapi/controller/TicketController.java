@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -101,6 +102,14 @@ public class TicketController{
         if(id == null) throw new APIException("id is required");
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Récupérer tous les Status.
+     */
+    @GetMapping("/enums")
+    public ResponseEntity<List<Status>> listStatus() {
+       return ResponseEntity.ok(Arrays.stream(Status.values()).collect(Collectors.toList()));
     }
 
 }
