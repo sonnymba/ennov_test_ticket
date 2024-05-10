@@ -13,11 +13,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -30,8 +29,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
  class MainServiceTests {
-     private static final String TEST_USER = "testUser";
-     private static final String CREDENTIALS = "password";
      private static final long ID = 9L;
      private static final String ROLE_ADMIN = "ROLE_ADMIN";
 
@@ -166,6 +163,16 @@ import static org.mockito.Mockito.*;
      }
 
      @Test
+     void testRemoveAdmin_roleNotFound() {
+         Long id = 25L;
+         Role role = new Role("ROLE_ADMIN");
+         role.setId(id);
+         when(userRepository.findById(ID)).thenReturn(Optional.empty());
+         assertThrows(ResourceNotFoundException.class, () -> mainService.removeAdmin(ID));
+     }
+
+
+     @Test
      void testGetRoles_success() {
          List<Role> roles = new ArrayList<>();
          roles.add(new Role());
@@ -190,28 +197,49 @@ import static org.mockito.Mockito.*;
 
 
      @Test
-      void testGetCurrentUser_authenticated() {
-         // Create a test user
+      void testGetCurrentUser() throws ResourceNotFoundException {
+         // Set up mock user repository
+
          User user = new User();
-         user.setUsername("username");
-         user.setEmail("email@email.com");
-         user.setPassword("admin");
-         userRepository.save(user);
+         user.setId(1L);
+         user.setUsername("testUser");
+         user.setPassword("testUser");
+         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
 
-         // Set the authentication
-         Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
-         SecurityContextHolder.getContext().setAuthentication(authentication);
+         // Set up mock authentication
+         Authentication authentication = mock(Authentication.class);
+         when(authentication.getPrincipal()).thenReturn(user);
+         when(authentication.isAuthenticated()).thenReturn(true);
+         SecurityContext securityContext = mock(SecurityContext.class);
+         when(securityContext.getAuthentication()).thenReturn(authentication);
+         SecurityContextHolder.setContext(securityContext);
 
-         // Call the service method
-         User currentUser = mainService.getCurrentUser();
-         if(currentUser != null){
-             assertThat(currentUser).isNotNull();
-             // Verify that the user was retrieved correctly
-             assertEquals(user.getUsername(), currentUser.getUsername());
-             assertEquals(user.getPassword(), currentUser.getPassword());
-             assertEquals(user.getEmail(), currentUser.getEmail());
-         }
+         // Call the method to test
+         User result =mainService.getCurrentUser();
 
+         // Verify the result
+         assertEquals(user, result);
+     }
+
+     @Test
+      void testGetCurrentUser_AuthenticationException() {
+         // Set up mock authentication
+         Authentication authentication = mock(Authentication.class);
+         when(authentication.isAuthenticated()).thenReturn(false);
+         SecurityContext securityContext = mock(SecurityContext.class);
+         when(securityContext.getAuthentication()).thenReturn(authentication);
+         SecurityContextHolder.setContext(securityContext);
+         // Call the method to test
+         assertThat(mainService.getCurrentUser()).isNull();
+     }
+
+     @Test
+     void testGetCurrentUser_AuthenticationNull() {
+         // Set up mock authentication
+         Authentication authentication = mock(Authentication.class);
+         when(authentication.isAuthenticated()).thenReturn(false);
+
+         assertThat(mainService.getCurrentUser()).isNull();
      }
 
  }

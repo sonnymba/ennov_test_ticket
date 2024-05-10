@@ -18,4 +18,10 @@ public class UserRequestDTO {
         this.username = username;
         this.email = email;
     }
+
+    public UserRequestDTO(String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+    }
 }

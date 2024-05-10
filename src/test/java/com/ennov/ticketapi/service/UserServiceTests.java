@@ -9,9 +9,9 @@ import com.ennov.ticketapi.entities.User;
 import com.ennov.ticketapi.exceptions.APIException;
 import com.ennov.ticketapi.exceptions.ResourceNotFoundException;
 import com.ennov.ticketapi.service.impl.UserServiceImpl;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -142,13 +142,13 @@ class UserServiceTests {
     }
 
     @Test
-    void testDeleteUserNotFound() {
+    void testDelete_UserNotFound() {
         when(userRepository.findById(ID)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> userService.delete(ID));
     }
 
     @Test
-     void testSaveWithExistingUsername() {
+     void testSave_WithExistingUsername() {
         UserRequestDTO dto = new UserRequestDTO();
         dto.setUsername("existingUser");
         when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
@@ -157,7 +157,7 @@ class UserServiceTests {
     }
 
     @Test
-     void testSaveWithExistingEmail() {
+     void testSave_WithExistingEmail() {
         UserRequestDTO dto = new UserRequestDTO();
         dto.setEmail("existingUser@email.com");
         when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));

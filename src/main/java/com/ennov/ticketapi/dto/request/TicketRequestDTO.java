@@ -14,6 +14,9 @@ public class TicketRequestDTO {
     private String description;
     private String status;
 
-
-
+    public TicketRequestDTO(String title, String description, String status) {
+        this.title = title;
+        this.description = description;
+        this.status = status;
+    }
 }

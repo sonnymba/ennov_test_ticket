@@ -8,7 +8,6 @@ import com.ennov.ticketapi.entities.User;
 import com.ennov.ticketapi.enums.Status;
 import com.ennov.ticketapi.exceptions.APIException;
 import com.ennov.ticketapi.exceptions.ResourceNotFoundException;
-import com.ennov.ticketapi.exceptions.UserNotFoundException;
 import com.ennov.ticketapi.service.impl.MainServiceImpl;
 import com.ennov.ticketapi.service.impl.TicketServiceimpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,7 +63,7 @@ class TicketServiceTests {
     }
 
     @Test
-    void testSave() throws Exception {
+    void testSave() {
         doReturn(ticket).when(ticketRepository).save(any(Ticket.class));
         Ticket savedTicket = ticketService.save(ticketDto);
         assertNotNull(savedTicket);
