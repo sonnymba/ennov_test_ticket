@@ -3,17 +3,14 @@ package com.ennov.ticketapi.entities;
 import com.ennov.ticketapi.dto.request.TicketRequestDTO;
 import com.ennov.ticketapi.enums.Status;
 import javax.persistence.*;
-import javax.validation.Valid;
 
 import lombok.*;
-import org.hibernate.annotations.NotFound;
 
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 @Entity
 public class Ticket{
 
@@ -43,4 +40,16 @@ public class Ticket{
         }
     }
 
+    public Ticket(String title, String description, Status status) {
+        this.title = title;
+        this.description = description;
+        this.status = status;
+    }
+
+    public Ticket(String title, String description, Status status, User assignedTo) {
+        this.title = title;
+        this.description = description;
+        this.assignedTo = assignedTo;
+        this.status = status;
+    }
 }

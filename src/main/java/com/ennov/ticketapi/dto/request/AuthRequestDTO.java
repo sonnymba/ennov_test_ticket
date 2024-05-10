@@ -9,7 +9,6 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@ToString
 public class AuthRequestDTO {
     @NotBlank(message = "Username est obligatoire")
     private String username;

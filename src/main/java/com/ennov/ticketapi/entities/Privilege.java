@@ -13,7 +13,6 @@ import java.util.Collection;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 @Entity
 public class Privilege implements Serializable {
     private static final long serialVersionUID = 1905122041950251207L;

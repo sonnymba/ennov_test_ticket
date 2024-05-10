@@ -211,8 +211,6 @@
 						</goals>
 						<configuration>
 							<excludes>
-								<exclude>**/entities/**/*.class</exclude>
-								<exclude>**/dto/**/*.class</exclude>
 								<exclude>**/config/**/*.class</exclude>
 								<exclude>**/utils/**/*.class</exclude>
 								<exclude>**/enums/**/*.class</exclude>

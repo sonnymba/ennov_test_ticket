@@ -1,7 +1,6 @@
 package com.ennov.ticketapi.dto.response;
 
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,7 +9,6 @@ import java.util.List;
 
 @Setter
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
 public class JwtResponse {
     private String accessToken;
@@ -19,6 +17,18 @@ public class JwtResponse {
     private String username;
     private List<String> roles;
 
-    public JwtResponse(String jwt, Long id, String username, List<String> roles, LiteUserDTO userByUsername) {
+    public JwtResponse(String jwt, Long id, String username, List<String> roles) {
+        this.accessToken = jwt;
+        this.id = id;
+        this.username = username;
+        this.roles = roles;
+    }
+
+    public JwtResponse(String accessToken, String type, Long id, String username, List<String> roles) {
+        this.accessToken = accessToken;
+        this.type = type;
+        this.id = id;
+        this.username = username;
+        this.roles = roles;
     }
 }

@@ -7,7 +7,6 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class AssignTicketRequestDTO {
     private Long id;
     private Long UserId;

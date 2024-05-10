@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 public class UserWithTicketDTO {
     private Long id;
     private String username;
@@ -23,4 +22,5 @@ public class UserWithTicketDTO {
         this.email = user.getEmail();
         this.tickets = user.getTickets().stream().map(LiteTicketDTO::new).collect(Collectors.toList());
     }
+
 }

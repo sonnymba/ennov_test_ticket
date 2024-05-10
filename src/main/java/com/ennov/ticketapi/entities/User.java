@@ -57,10 +57,30 @@ public class User implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Collection<Role> roles = new ArrayList<>();
-
     private boolean tokenExpired;
 
+    public User(String username, String email, List<Ticket> tickets) {
+        this.username = username;
+        this.email = email;
+        this.tickets = tickets;
+    }
 
+    public User(String username, String email, Collection<Role> roles) {
+        this.username = username;
+        this.email = email;
+        this.roles = roles;
+    }
+
+    public User(String username, String email) {
+        this.username = username;
+        this.email = email;
+    }
+
+    public User(Long id, String username, Collection<Role> roles) {
+        this.id = id;
+        this.username = username;
+        this.roles = roles;
+    }
 
     //userDetails
     @Override
